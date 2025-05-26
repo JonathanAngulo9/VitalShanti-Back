@@ -1,23 +1,10 @@
 import express from "express";
-import jwt from "jsonwebtoken";
-import mockUsers from "../data/users.js";
+import { login, registerInstructor, registerPaciente } from '../controllers/authController.js';
 
 const router = express.Router();
 
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  const user = mockUsers.find(u => u.email === email);
-
-  if (!user) return res.status(401).json({ message: "Usuario no encontrado" });
-
-  if (user.password !== password) return res.status(401).json({ message: "Contraseña incorrecta" });
-
-  res.json({
-      success: true,
-      token: 'fake-jwt-token-123456',
-      user: user,
-      message: "Inicio de sesión exitoso"
-    });
-});
+router.post("/login", login);
+router.post("/register/instructor", registerInstructor);
+router.post("/register/paciente", registerPaciente);
 
 export default router;

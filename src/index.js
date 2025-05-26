@@ -3,7 +3,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import swaggerUi from "swagger-ui-express";
 import authRoutes from "./routes/authRoutes.js";
-import mockData from "./data/users.js";
 
 dotenv.config();
 
