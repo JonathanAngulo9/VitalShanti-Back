@@ -22,13 +22,12 @@ model Paciente {
 }
 
 model TipoTerapia {
-  id          Int        @id @default(autoincrement())
-  nombre      String     @unique
+  id          Int       @id @default(autoincrement())
+  nombre      String    @unique
   descripcion String?
   series      Serie[]
-  posturas    Postura[]  @relation("TerapiaPostura")
+  posturas    Postura[] @relation("TerapiaPostura")
 }
-
 
 model Postura {
   id             Int            @id @default(autoincrement())
