@@ -1,0 +1,41 @@
+paths:
+  /pacientes/{id}:
+    patch:
+      tags:
+        - Pacientes
+      summary: Actualizar paciente
+      description: Actualiza los datos de un paciente existente.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  example: Ana María
+                lastName:
+                  type: string
+                  example: Gómez López
+                phone:
+                  type: string
+                  example: "0991234567"
+                email:
+                  type: string
+                  example: ana_actualizado@vitalshanti.com
+                password:
+                  type: string
+                  example: nuevopass123
+      responses:
+        "200":
+          description: Paciente actualizado correctamente
+        "404":
+          description: Paciente no encontrado

@@ -114,3 +114,51 @@ paths:
           description: Paciente registrado exitosamente
         "400":
           description: Error al registrar el paciente
+
+  /pacientes:
+    post:
+      tags:
+        - Pacientes
+      summary: Crear nuevo paciente
+      description: Crea un nuevo paciente y lo asocia a un instructor.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstName
+                - lastName
+                - identification
+                - phone
+                - email
+                - password
+                - instructorId
+              properties:
+                firstName:
+                  type: string
+                  example: Ana
+                lastName:
+                  type: string
+                  example: Gómez
+                identification:
+                  type: string
+                  example: "1234567890"
+                phone:
+                  type: string
+                  example: "0998765432"
+                email:
+                  type: string
+                  example: ana@vitalshanti.com
+                password:
+                  type: string
+                  example: demo123
+                instructorId:
+                  type: integer
+                  example: 1
+      responses:
+        "201":
+          description: Paciente creado exitosamente
+        "400":
+          description: Error de validación o correo ya registrado

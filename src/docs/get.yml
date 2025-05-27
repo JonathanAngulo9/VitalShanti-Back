@@ -1,0 +1,19 @@
+paths:
+  /pacientes:
+    get:
+      tags:
+        - Pacientes
+      summary: Obtener pacientes por instructor
+      description: Devuelve la lista de pacientes asociados a un instructor.
+      parameters:
+        - name: instructorId
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Lista de pacientes
+        "400":
+          description: Faltó el instructorId
