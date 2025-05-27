@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import swaggerUi from "swagger-ui-express";
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './docs/swagger.js';
 import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
@@ -13,7 +14,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 
 // Swagger (documentación dummy por ahora)
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup({}, { explorer: true }));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/", (req, res) => res.send("VitalShanti Backend Running"));
 
