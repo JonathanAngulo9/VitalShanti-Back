@@ -1,0 +1,101 @@
+model Instructor {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  email     String     @unique
+  password  String
+  pacientes Paciente[] // relación uno a muchos
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Paciente {
+  id             Int            @id @default(autoincrement())
+  nombre         String
+  email          String         @unique
+  password       String
+  instructor     Instructor     @relation(fields: [instructorId], references: [id])
+  instructorId   Int
+  seriesAsignada SeriePaciente? // relación 1 a 1 para la serie activa
+  sesiones       Sesion[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model TipoTerapia {
+  id          Int        @id @default(autoincrement())
+  nombre      String     @unique
+  descripcion String?
+  series      Serie[]
+  posturas    Postura[]  @relation("TerapiaPostura")
+}
+
+
+model Postura {
+  id             Int            @id @default(autoincrement())
+  nombreEsp      String
+  nombreSanskrit String?
+  fotoUrl        String
+  videoUrl       String?
+  instrucciones  String
+  beneficios     String
+  modificaciones String?
+  terapias       TipoTerapia[]  @relation("TerapiaPostura")
+  seriesDetalle  SerieDetalle[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Serie {
+  id             Int             @id @default(autoincrement())
+  nombre         String
+  tipoTerapiaId  Int
+  tipoTerapia    TipoTerapia     @relation(fields: [tipoTerapiaId], references: [id])
+  sesionesRecom  Int // cantidad recomendada de sesiones
+  seriesDetalle  SerieDetalle[]
+  seriesAsignada SeriePaciente[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model SerieDetalle {
+  id        Int @id @default(autoincrement())
+  serieId   Int
+  posturaId Int
+  orden     Int // orden de la postura en la serie
+  duracion  Int // duración en segundos por postura
+
+  serie   Serie   @relation(fields: [serieId], references: [id])
+  postura Postura @relation(fields: [posturaId], references: [id])
+
+  @@unique([serieId, orden]) // evitar orden duplicado en la misma serie
+}
+
+model SeriePaciente {
+  id                  Int      @id @default(autoincrement())
+  pacienteId          Int      @unique
+  serieId             Int
+  sesionesCompletadas Int      @default(0)
+  activa              Boolean  @default(true)
+  paciente            Paciente @relation(fields: [pacienteId], references: [id])
+  serie               Serie    @relation(fields: [serieId], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  Sesion              Sesion[]
+}
+
+model Sesion {
+  id              Int           @id @default(autoincrement())
+  pacienteId      Int
+  seriePacienteId Int
+  fechaInicio     DateTime      @default(now())
+  fechaFin        DateTime?
+  pausas          Int           @default(0)
+  tiempoEfectivo  Int? // en segundos, descontando pausas
+  molestiaInicio  String? // (sin dolor, leve, moderado, intenso, maximo)
+  molestiaFin     String?
+  comentario      String?
+  paciente        Paciente      @relation(fields: [pacienteId], references: [id])
+  seriePaciente   SeriePaciente @relation(fields: [seriePacienteId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
