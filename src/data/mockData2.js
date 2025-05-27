@@ -135,6 +135,39 @@ export default {
       pauses: 0,
       effectiveMinutes: 25,
       comment: "Excelente, sin molestias"
+    },
+    {
+      id: 3,
+      patientSeriesId: 1,
+      startedAt: "2025-05-23T15:00:00Z",
+      endedAt: "2025-05-23T15:20:00Z",
+      painBeforeId: 2,
+      painAfterId: 1,
+      pauses: 2,
+      effectiveMinutes: 15,
+      comment: "Noté algo de rigidez al inicio"
+    },
+    {
+      id: 4,
+      patientSeriesId: 1,
+      startedAt: "2025-05-24T14:15:00Z",
+      endedAt: "2025-05-24T14:45:00Z",
+      painBeforeId: 1,
+      painAfterId: 0,
+      pauses: 0,
+      effectiveMinutes: 28,
+      comment: "Sin dolor, sesión muy buena"
+    },
+    {
+      id: 5,
+      patientSeriesId: 1,
+      startedAt: "2025-05-25T13:45:00Z",
+      endedAt: "2025-05-25T14:10:00Z",
+      painBeforeId: 3,
+      painAfterId: 2,
+      pauses: 1,
+      effectiveMinutes: 20,
+      comment: "El dolor disminuyó pero aún presente"
     }
   ]
 };

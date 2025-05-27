@@ -38,3 +38,22 @@ export const updatePatient = (req, res) => {
 
     return res.json(result);
 };
+
+export const getPainProgressByPatient = (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({
+            success: false,
+            message: "id es requerido"
+        });
+    }
+
+    const result = getPainOverTime(parseInt(id));
+
+    if (!result.success) {
+        return res.status(404).json(result);
+    }
+
+    return res.json(result);
+};

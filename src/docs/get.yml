@@ -17,3 +17,24 @@ paths:
           description: Lista de pacientes
         "400":
           description: Faltó el instructorId
+
+  /pacientes/progreso/{id}:
+    get:
+      tags:
+        - Progreso
+      summary: Obtener progreso de dolor de un paciente
+      description: Devuelve el historial de dolor inicial y final por fecha para un paciente.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 2
+      responses:
+        "200":
+          description: Datos de progreso de dolor por fecha
+        "404":
+          description: Paciente no tiene sesiones registradas
+        "400":
+          description: ID del paciente faltante o inválido
