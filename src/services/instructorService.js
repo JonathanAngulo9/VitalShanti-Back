@@ -1,50 +1,74 @@
-import mockData from '../data/mockData2.js';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
-export const crearRutina = ({ pacienteId, nombre, tipoTerapiaId, sesionesRecom, posturas }, instructorId) => {
-    if (!pacienteId || !nombre || !tipoTerapiaId || !posturas || posturas.length < 6) {
-        throw new Error('Faltan datos o menos de 6 posturas');
+/**
+ * Crea una rutina (serie) para un paciente, validando que sea del instructor correspondiente
+ */
+export const crearRutina = async ({ pacienteId, nombre, tipoTerapiaId, sesionesRecom, posturas }, instructorId) => {
+  if (!pacienteId || !nombre || !tipoTerapiaId || !posturas || posturas.length < 6) {
+    throw new Error('Faltan datos o menos de 6 posturas');
+  }
+
+  // Verificar si el paciente pertenece al instructor
+  const vinculo = await prisma.instructorPatient.findFirst({
+    where: {
+      instructorId: instructorId,
+      patientId: pacienteId,
     }
+  });
 
-    const paciente = mockData.pacientes.find(p => p.id === pacienteId);
-    if (!paciente || paciente.instructorId !== instructorId) {
-        throw new Error('No autorizado para crear rutina para este paciente');
-    }
+  if (!vinculo) {
+    throw new Error('No autorizado para crear rutina para este paciente');
+  }
 
-    // Simula la creación de la serie
-    const nuevaSerie = {
-        id: mockData.series.length + 1,
-        nombre,
-        tipoTerapiaId,
-        sesionesRecom,
-        seriesDetalle: posturas.map((p, i) => ({
-            id: i + 1,
-            posturaId: p.posturaId,
-            orden: p.orden,
-            duracion: p.duracion,
+  // Crear la serie
+  const nuevaSerie = await prisma.series.create({
+    data: {
+      name: nombre,
+      therapyId: tipoTerapiaId,
+      instructorId: instructorId,
+      recommendedSessions: sesionesRecom,
+      postures: {
+        create: posturas.map((p, i) => ({
+          postureId: p.posturaId,
+          order: p.orden ?? i + 1,
+          durationMinutes: p.duracion,
         })),
-    };
-    mockData.series.push(nuevaSerie);
-
-    // Simula la asignación al paciente (upsert)
-    const existing = mockData.seriePacientes.find(sp => sp.pacienteId === pacienteId);
-    if (existing) {
-        existing.serieId = nuevaSerie.id;
-        existing.activa = true;
-        existing.sesionesCompletadas = 0;
-    } else {
-        mockData.seriePacientes.push({
-            pacienteId,
-            serieId: nuevaSerie.id,
-            activa: true,
-            sesionesCompletadas: 0,
-        });
+      },
+    },
+    include: {
+      postures: true
     }
+  });
 
-    return nuevaSerie;
+  // Upsert de asignación paciente-serie
+  const asignacion = await prisma.patientSeries.upsert({
+    where: {
+      patientId_seriesId: {
+        patientId: pacienteId,
+        seriesId: nuevaSerie.id
+      }
+    },
+    update: {
+      isActive: true,
+      sessionsCompleted: 0,
+      assignedAt: new Date(),
+    },
+    create: {
+      patientId: pacienteId,
+      seriesId: nuevaSerie.id,
+      isActive: true,
+      sessionsCompleted: 0,
+      assignedAt: new Date(),
+    }
+  });
+
+  return nuevaSerie;
 };
 
-// Obtener todas las posturas desde mockData
-export const obtenerPosturas = () => {
-    return mockData.postures;
+/**
+ * Devuelve todas las posturas
+ */
+export const obtenerPosturas = async () => {
+  return await prisma.posture.findMany();
 };
-

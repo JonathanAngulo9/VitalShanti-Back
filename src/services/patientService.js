@@ -1,46 +1,72 @@
-import mockData from '../data/mockData2.js';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
-export const createPatient = (patientData, instructorId) => {
-    const { email } = patientData;
+/**
+ * Crea un nuevo paciente y lo vincula a un instructor
+ */
+export const createPatient = async (patientData, instructorId) => {
+  const { email } = patientData;
 
-    const existingUser = mockData.users.find(u => u.email === email);
-    if (existingUser) {
-        return { success: false, message: "El correo ya está registrado" };
+  // Verificar si el correo ya está registrado
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+
+  if (existingUser) {
+    return { success: false, message: "El correo ya está registrado" };
+  }
+
+  // Crear nuevo paciente
+  const newPatient = await prisma.user.create({
+    data: {
+      ...patientData,
+      role: 'Paciente',
     }
+  });
 
-    const newPatient = {
-        id: mockData.users.length + 1,
-        role: "Paciente",
-        ...patientData
-    };
+  // Asociar al instructor
+  await prisma.instructorPatient.create({
+    data: {
+      instructorId,
+      patientId: newPatient.id
+    }
+  });
 
-    mockData.users.push(newPatient);
-
-    mockData.instructorPatients.push({
-        id: mockData.instructorPatients.length + 1,
-        instructorId,
-        patientId: newPatient.id
-    });
-
-    return { success: true, patient: newPatient };
+  return { success: true, patient: newPatient };
 };
 
-export const getPatientsByInstructorId = (instructorId) => {
-    const relatedPatients = mockData.instructorPatients
-        .filter(rel => rel.instructorId === parseInt(instructorId))
-        .map(rel => mockData.users.find(u => u.id === rel.patientId));
+/**
+ * Obtener pacientes asignados a un instructor
+ */
+export const getPatientsByInstructorId = async (instructorId) => {
+  const patients = await prisma.instructorPatient.findMany({
+    where: { instructorId: parseInt(instructorId) },
+    include: {
+      patient: true,
+    }
+  });
 
-    return relatedPatients;
+  return patients.map(p => p.patient);
 };
 
-export const updatePatient = (id, updateData) => {
-    const patient = mockData.users.find(u => u.id === parseInt(id) && u.role === "Paciente");
-
-    if (!patient) {
-        return { success: false, message: "Paciente no encontrado" };
+/**
+ * Actualizar información del paciente
+ */
+export const updatePatient = async (id, updateData) => {
+  // Verificar existencia y rol
+  const existing = await prisma.user.findFirst({
+    where: {
+      id: parseInt(id),
+      role: 'Paciente',
     }
+  });
 
-    Object.assign(patient, updateData);
+  if (!existing) {
+    return { success: false, message: "Paciente no encontrado" };
+  }
 
-    return { success: true, patient };
+  const updated = await prisma.user.update({
+    where: { id: parseInt(id) },
+    data: updateData
+  });
+
+  return { success: true, patient: updated };
 };

@@ -1,100 +1,133 @@
-model Instructor {
-  id        Int        @id @default(autoincrement())
-  nombre    String
-  email     String     @unique
-  password  String
-  pacientes Paciente[] // relación uno a muchos
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
 }
 
-model Paciente {
-  id             Int            @id @default(autoincrement())
-  nombre         String
-  email          String         @unique
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int     @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  identification String  @unique
+  phone          String
+  role           String
+  email          String  @unique
   password       String
-  instructor     Instructor     @relation(fields: [instructorId], references: [id])
-  instructorId   Int
-  seriesAsignada SeriePaciente? // relación 1 a 1 para la serie activa
-  sesiones       Sesion[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relaciones como Instructor
+  seriesAsInstructor Series[] @relation("InstructorSeries")
+  patients           InstructorPatient[] @relation("Instructor")
+
+  // Relaciones como Paciente
+  seriesAsPatient    PatientSeries[] @relation("PatientSeries")
+  instructors        InstructorPatient[] @relation("Patient")
 }
 
-model TipoTerapia {
-  id          Int       @id @default(autoincrement())
-  nombre      String    @unique
-  descripcion String?
-  series      Serie[]
-  posturas    Postura[] @relation("TerapiaPostura")
+model InstructorPatient {
+  id          Int  @id @default(autoincrement())
+  instructor  User @relation("Instructor", fields: [instructorId], references: [id])
+  instructorId Int
+  patient     User @relation("Patient", fields: [patientId], references: [id])
+  patientId   Int
 }
 
-model Postura {
-  id             Int            @id @default(autoincrement())
-  nombreEsp      String
-  nombreSanskrit String?
-  fotoUrl        String
-  videoUrl       String?
-  instrucciones  String
-  beneficios     String
-  modificaciones String?
-  terapias       TipoTerapia[]  @relation("TerapiaPostura")
-  seriesDetalle  SerieDetalle[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+model Therapy {
+  id       Int       @id @default(autoincrement())
+  name     String
+  series   Series[]
+  postures TherapyPosture[]
 }
 
-model Serie {
-  id             Int             @id @default(autoincrement())
-  nombre         String
-  tipoTerapiaId  Int
-  tipoTerapia    TipoTerapia     @relation(fields: [tipoTerapiaId], references: [id])
-  sesionesRecom  Int // cantidad recomendada de sesiones
-  seriesDetalle  SerieDetalle[]
-  seriesAsignada SeriePaciente[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+model Posture {
+  id            Int       @id @default(autoincrement())
+  nameEs        String
+  nameSans      String
+  instructions  String
+  benefits      String
+  modifications String
+  warnings      String
+  image         String
+  video         String
+
+  therapyLinks  TherapyPosture[]
+  seriesLinks   SeriesPosture[]
 }
 
-model SerieDetalle {
-  id        Int @id @default(autoincrement())
-  serieId   Int
-  posturaId Int
-  orden     Int // orden de la postura en la serie
-  duracion  Int // duración en segundos por postura
+model TherapyPosture {
+  therapy    Therapy @relation(fields: [therapyId], references: [id])
+  therapyId  Int
+  posture    Posture @relation(fields: [postureId], references: [id])
+  postureId  Int
 
-  serie   Serie   @relation(fields: [serieId], references: [id])
-  postura Postura @relation(fields: [posturaId], references: [id])
-
-  @@unique([serieId, orden]) // evitar orden duplicado en la misma serie
+  @@id([therapyId, postureId])
 }
 
-model SeriePaciente {
-  id                  Int      @id @default(autoincrement())
-  pacienteId          Int      @unique
-  serieId             Int
-  sesionesCompletadas Int      @default(0)
-  activa              Boolean  @default(true)
-  paciente            Paciente @relation(fields: [pacienteId], references: [id])
-  serie               Serie    @relation(fields: [serieId], references: [id])
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  Sesion              Sesion[]
+model Series {
+  id                  Int     @id @default(autoincrement())
+  instructor          User    @relation("InstructorSeries", fields: [instructorId], references: [id])
+  instructorId        Int
+  name                String
+  therapy             Therapy @relation(fields: [therapyId], references: [id])
+  therapyId           Int
+  recommendedSessions Int
+
+  postures            SeriesPosture[]
+  patientSeries       PatientSeries[]
 }
 
-model Sesion {
-  id              Int           @id @default(autoincrement())
-  pacienteId      Int
-  seriePacienteId Int
-  fechaInicio     DateTime      @default(now())
-  fechaFin        DateTime?
-  pausas          Int           @default(0)
-  tiempoEfectivo  Int? // en segundos, descontando pausas
-  molestiaInicio  String? // (sin dolor, leve, moderado, intenso, maximo)
-  molestiaFin     String?
-  comentario      String?
-  paciente        Paciente      @relation(fields: [pacienteId], references: [id])
-  seriePaciente   SeriePaciente @relation(fields: [seriePacienteId], references: [id])
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+model SeriesPosture {
+  series     Series  @relation(fields: [seriesId], references: [id])
+  seriesId   Int
+  posture    Posture @relation(fields: [postureId], references: [id])
+  postureId  Int
+  durationMinutes Int
+  order      Int
+
+  @@id([seriesId, postureId])
+}
+
+model PatientSeries {
+  id               Int       @id @default(autoincrement())
+  patient          User      @relation("PatientSeries", fields: [patientId], references: [id])
+  patientId        Int
+  series           Series    @relation(fields: [seriesId], references: [id])
+  seriesId         Int
+  isActive         Boolean   @default(true)
+  assignedAt       DateTime
+  sessionsCompleted Int
+
+  sessions         Session[]
+}
+
+model PainLevel {
+  id   Int    @id @default(autoincrement())
+  name String
+  beforeSessions Session[] @relation("PainBefore")
+  afterSessions  Session[] @relation("PainAfter")
+}
+
+model Session {
+  id               Int        @id @default(autoincrement())
+  patientSeries    PatientSeries @relation(fields: [patientSeriesId], references: [id])
+  patientSeriesId  Int
+  startedAt        DateTime
+  endedAt          DateTime
+  painBefore       PainLevel @relation("PainBefore", fields: [painBeforeId], references: [id])
+  painBeforeId     Int
+  painAfter        PainLevel @relation("PainAfter", fields: [painAfterId], references: [id])
+  painAfterId      Int
+  pauses           Int
+  effectiveMinutes Int
+  comment String @db.Text
 }
