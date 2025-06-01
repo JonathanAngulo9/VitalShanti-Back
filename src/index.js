@@ -5,6 +5,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './docs/swagger.js';
 import authRoutes from "./routes/authRoutes.js";
 import patientRoutes from "./routes/patientRoutes.js";
+import sessionRoutes from "./routes/sessionRoutes.js";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/pacientes", patientRoutes);
+app.use("/api/session-logs", sessionRoutes);
 
 // Swagger (documentación dummy por ahora)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
