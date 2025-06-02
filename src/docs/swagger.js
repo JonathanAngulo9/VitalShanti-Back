@@ -27,7 +27,8 @@ const swaggerDefinition = {
 
 const DIR = path.join(__dirname).replace(/\\/g, '/');
 
-console.log(DIR)
+//console.log(DIR)
+console.log("documetation: http://localhost:3000/api-docs");
 const swaggerOptions = {
     swaggerDefinition,
     apis: [`${DIR}/*.yml`]
