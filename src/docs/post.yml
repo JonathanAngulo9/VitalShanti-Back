@@ -162,3 +162,60 @@ paths:
           description: Paciente creado exitosamente
         "400":
           description: Error de validación o correo ya registrado
+
+  /instructor/rutinas:
+    post:
+      tags:
+        - Rutinas
+      summary: Crear una nueva rutina
+      description: Permite crear una rutina para un paciente asignado al instructor autenticado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pacienteId
+                - nombre
+                - tipoTerapiaId
+                - sesionesRecom
+                - posturas
+              properties:
+                pacienteId:
+                  type: integer
+                  example: 2
+                nombre:
+                  type: string
+                  example: Rutina para espalda
+                tipoTerapiaId:
+                  type: integer
+                  example: 2
+                sesionesRecom:
+                  type: integer
+                  example: 5
+                posturas:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - posturaId
+                      - orden
+                      - duracion
+                    properties:
+                      posturaId:
+                        type: integer
+                        example: 1
+                      orden:
+                        type: integer
+                        example: 1
+                      duracion:
+                        type: integer
+                        example: 10
+      responses:
+        "201":
+          description: Rutina creada exitosamente
+        "400":
+          description: Error en la creación de la rutina (datos faltantes o inválidos)
+        "401":
+          description: Instructor no autenticado
