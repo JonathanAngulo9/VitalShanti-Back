@@ -1,10 +1,15 @@
 import { loginUser, registerUser } from '../services/userService.js';
 
+//Token
+import jwt from 'jsonwebtoken';
+const JWT_SECRET = process.env.JWT_SECRET;
+//
+
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await loginUser(email, password); // ✅ Espera la promesa
+    const user = await loginUser(email, password); 
 
     if (!user) {
       return res.status(401).json({
@@ -13,11 +18,19 @@ export const login = async (req, res) => {
       });
     }
 
+    // Token JWT
+    const token = jwt.sign(
+      { id: user.id, rol: user.role, email: user.email }, // payload
+      JWT_SECRET,
+      { expiresIn: '1h' } // expira en 1 hora
+    );
+
     console.log("Usuario autenticado:", user);
+    console.log("Token generado:", token);
 
     return res.json({
       success: true,
-      token: 'fake-jwt-token-123456',
+      token,
       user,
       message: "Inicio de sesión exitoso"
     });
