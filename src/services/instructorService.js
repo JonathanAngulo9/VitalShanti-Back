@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
  * Crea una rutina (serie) para un paciente, validando que sea del instructor correspondiente
  */
 export const crearRutina = async ({ pacienteId, nombre, tipoTerapiaId, sesionesRecom, posturas }, instructorId) => {
-  if (!pacienteId || !nombre || !tipoTerapiaId || !posturas || posturas.length < 6) {
+  if (!pacienteId || !nombre || !tipoTerapiaId || !posturas || posturas.length < 1) {
     throw new Error('Faltan datos o menos de 6 posturas');
   }
 
@@ -71,4 +71,8 @@ export const crearRutina = async ({ pacienteId, nombre, tipoTerapiaId, sesionesR
  */
 export const obtenerPosturas = async () => {
   return await prisma.posture.findMany();
+};
+
+export const obtenerTerapias = async () => {
+  return await prisma.therapy.findMany();
 };
