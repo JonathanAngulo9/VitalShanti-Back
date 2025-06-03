@@ -38,3 +38,71 @@ paths:
           description: Paciente no tiene sesiones registradas
         "400":
           description: ID del paciente faltante o inválido
+
+  /instructor/posturas:
+    get:
+      tags:
+        - Instructor
+      summary: Obtener todas las posturas
+      description: Devuelve la lista completa de posturas disponibles para yoga terapéutico.
+      responses:
+        "200":
+          description: Lista de posturas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  posturas:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        nameEs:
+                          type: string
+                          example: "Torsión de Bharadvaja I"
+                        nameSans:
+                          type: string
+                          example: "Bharadvājāsana I"
+                        image:
+                          type: string
+                          example: "https://cdn.doyou.com/wp/2017/07/bharadvajasana-I.jpg"
+        "500":
+          description: Error del servidor
+
+  /instructor/terapias:
+    get:
+      tags:
+        - Instructor
+      summary: Obtener todas las terapias
+      description: Devuelve la lista completa de terapias disponibles para yoga terapéutico.
+      responses:
+        "200":
+          description: Lista de terapias
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  terapias:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "Ansiedad"
+        "500":
+          description: Error del servidor
