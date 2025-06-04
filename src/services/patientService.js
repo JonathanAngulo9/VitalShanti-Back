@@ -70,3 +70,28 @@ export const updatePatient = async (id, updateData) => {
 
   return { success: true, patient: updated };
 };
+
+export const fetchSesionesByPaciente = async (idPaciente) => {
+  const sesiones = await prisma.session.findMany({
+    where: {
+      patientSeries: {
+        patientId: parseInt(idPaciente),
+      },
+    },
+    select: {
+      id: true,
+      startedAt: true,
+      endedAt: true,
+      pauses: true,
+      effectiveMinutes: true,
+      comment: true,
+      painBefore: { select: { level: true, description: true } },
+      painAfter: { select: { level: true, description: true } },
+    },
+    orderBy: {
+      startedAt: 'desc',
+    },
+  });
+
+  return sesiones;
+};

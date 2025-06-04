@@ -1,7 +1,8 @@
 import {
   createPatient as createPatientService,
   getPatientsByInstructorId,
-  updatePatient as updatePatientService
+  updatePatient as updatePatientService,
+  fetchSesionesByPaciente
 } from "../services/patientService.js";
 import { getPainOverTime } from "../services/sessionService.js";
 
@@ -87,5 +88,17 @@ export const getPainProgressByPatient = async (req, res) => {
   } catch (error) {
     console.error("Error al obtener progreso de dolor:", error);
     return res.status(500).json({ success: false, message: "Error del servidor" });
+  }
+};
+
+export const getSesionesByPaciente = async (req, res) => {
+  const { idPaciente } = req.params;
+
+  try {
+    const sesiones = await fetchSesionesByPaciente(idPaciente);
+    res.json({ success: true, data: sesiones });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error al obtener sesiones del paciente." });
   }
 };
