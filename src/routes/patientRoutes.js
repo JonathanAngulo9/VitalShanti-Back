@@ -1,11 +1,10 @@
 import express from "express";
-import { getPatientsByInstructor, updatePatient, getPainProgressByPatient} from "../controllers/patientController.js";
-import { registerPaciente } from '../controllers/authController.js';
+import { createPatient, getPatientsByInstructor, updatePatient, getPainProgressByPatient} from "../controllers/patientController.js";
 import { getRoutine } from "../controllers/routineController.js";
 
 const router = express.Router();
 
-router.post("/", registerPaciente);
+router.post("/", createPatient);
 router.get("/", getPatientsByInstructor);
 router.patch("/:id", updatePatient);
 router.get("/progreso/:id", getPainProgressByPatient);

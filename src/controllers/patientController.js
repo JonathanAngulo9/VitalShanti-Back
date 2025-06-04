@@ -3,15 +3,20 @@ import {
   getPatientsByInstructorId,
   updatePatient as updatePatientService
 } from "../services/patientService.js";
-
 import { getPainOverTime } from "../services/sessionService.js";
+
+import bcrypt from 'bcrypt'; // Asegúrate de tener instalado bcrypt
 
 export const createPatient = async (req, res) => {
   try {
     const { firstName, lastName, identification, phone, email, password, instructorId } = req.body;
 
+    // Hashear la contraseña
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const result = await createPatientService(
-      { firstName, lastName, identification, phone, email, password },
+      { firstName, lastName, identification, phone, email, password: hashedPassword },
       instructorId
     );
 
@@ -25,6 +30,7 @@ export const createPatient = async (req, res) => {
     return res.status(500).json({ success: false, message: "Error del servidor" });
   }
 };
+
 
 export const getPatientsByInstructor = async (req, res) => {
   try {
