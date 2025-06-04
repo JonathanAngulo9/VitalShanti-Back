@@ -5,6 +5,24 @@ const prisma = new PrismaClient();
  * Obtiene el historial de niveles de dolor de un paciente
  */
 export const getPainOverTime = async (idPatient) => {
+  // Buscar el paciente
+  const paciente = await prisma.user.findUnique({
+    where: { id: parseInt(idPatient) },
+    select: {
+      firstName: true,
+      lastName: true
+    }
+  });
+
+  if (!paciente) {
+    return {
+      success: false,
+      message: "Paciente no encontrado"
+    };
+  }
+
+  const nombreCompleto = `${paciente.firstName} ${paciente.lastName}`;
+
   // Obtener las asignaciones activas del paciente
   const patientSeries = await prisma.patientSeries.findMany({
     where: { patientId: parseInt(idPatient) },
@@ -14,7 +32,8 @@ export const getPainOverTime = async (idPatient) => {
   if (patientSeries.length === 0) {
     return {
       success: false,
-      message: "El paciente no tiene series asignadas"
+      message: "El paciente no tiene series asignadas",
+      nombreCompleto
     };
   }
 
@@ -37,7 +56,8 @@ export const getPainOverTime = async (idPatient) => {
   if (sessions.length === 0) {
     return {
       success: false,
-      message: "El paciente no tiene sesiones registradas"
+      message: "El paciente no tiene sesiones registradas",
+      nombreCompleto
     };
   }
 
@@ -46,15 +66,16 @@ export const getPainOverTime = async (idPatient) => {
     dolorInicial: session.painBeforeId,
     dolorInicialTexto: session.painBefore?.name ?? '',
     dolorFinal: session.painAfterId,
-    dolorFinalTexto: session.painAfter?.name ?? ''
+    dolorFinalTexto: session.painAfter?.name ?? '',
+    comentarioSession: session.comment
   }));
 
   return {
     success: true,
+    nombreCompleto,
     data: painData
   };
 };
-
 //Crear una nueva sesion
 export const createSession = async ({ patientSeriesId, painBeforeId, startedAt }) => {
   try {
