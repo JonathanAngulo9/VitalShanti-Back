@@ -21,6 +21,18 @@ export const crearRutina = async ({ pacienteId, nombre, tipoTerapiaId, sesionesR
     throw new Error('No autorizado para crear rutina para este paciente');
   }
 
+  // Verificar si el paciente ya tiene una serie activa
+  const serieActiva = await prisma.patientSeries.findFirst({
+    where: {
+      patientId: pacienteId,
+      isActive: true,
+    }
+  });
+
+  if (serieActiva) {
+    throw new Error('El paciente ya cuenta con una serie activa actualmente');
+  }
+
   // Crear la serie
   const nuevaSerie = await prisma.series.create({
     data: {
