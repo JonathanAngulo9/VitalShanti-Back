@@ -5,8 +5,8 @@ const prisma = new PrismaClient();
  * Crea una rutina (serie) para un paciente, validando que sea del instructor correspondiente
  */
 export const crearRutina = async ({ pacienteId, nombre, tipoTerapiaId, sesionesRecom, posturas }, instructorId) => {
-  if (!pacienteId || !nombre || !tipoTerapiaId || !posturas || posturas.length < 0) {
-    throw new Error('Faltan datos o menos de 6 posturas');
+  if (!pacienteId || !nombre || !tipoTerapiaId || !posturas || posturas.length < 12) {
+    throw new Error('Faltan datos o menos de 12 posturas');
   }
 
   // Verificar si el paciente pertenece al instructor
