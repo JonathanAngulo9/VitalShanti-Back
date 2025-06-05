@@ -85,8 +85,8 @@ export const fetchSesionesByPaciente = async (idPaciente) => {
       pauses: true,
       effectiveMinutes: true,
       comment: true,
-      painBefore: { select: { level: true, description: true } },
-      painAfter: { select: { level: true, description: true } },
+      painBefore: { select: { name: true} },
+      painAfter: { select: { name: true } },
     },
     orderBy: {
       startedAt: 'desc',
