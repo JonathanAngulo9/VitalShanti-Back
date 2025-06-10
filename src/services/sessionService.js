@@ -79,14 +79,27 @@ export const getPainOverTime = async (idPatient) => {
 //Crear una nueva sesion
 export const createSession = async ({ patientSeriesId, painBeforeId, startedAt }) => {
   try {
+    // Verificar si existe el PatientSeries
+    const patientSeriesExists = await prisma.patientSeries.findUnique({
+      where: { id: Number(patientSeriesId) }
+    });
 
+    // Imprimir si se encuentra o no el PatientSeries
+    console.log('Paciente con la serie encontrado:', patientSeriesExists);
+
+    // Si no se encuentra, lanzar un error
+    if (!patientSeriesExists) {
+      throw new Error(`No se encontró la serie de paciente con el ID ${patientSeriesId}`);
+    }
+
+    // Crear la nueva sesión
     const newSession = await prisma.session.create({
       data: {
         painBefore: { connect: { id: Number(painBeforeId) } },
-        painAfter: { connect: { id: 1 } }, // valor inicial quemado porque la BD no permite null
+        painAfter: { connect: { id: 1 } }, // valor inicial quemado
         patientSeries: { connect: { id: Number(patientSeriesId) } },
         startedAt: new Date(startedAt),
-        endedAt: new Date("2025-12-31T23:59:59.000Z"),// valor inicial quemado porque la BD no permite null
+        endedAt: new Date("2025-12-31T23:59:59.000Z"), // valor inicial quemado
         pauses: 0,
         effectiveMinutes: 25,
         comment: ""
@@ -95,7 +108,6 @@ export const createSession = async ({ patientSeriesId, painBeforeId, startedAt }
         patientSeries: true
       }
     });
-
 
     return newSession;
 

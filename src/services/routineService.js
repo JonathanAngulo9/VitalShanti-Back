@@ -27,7 +27,7 @@ export const getRoutineByPatientId = async (patientId) => {
       return { success: false, message: "El paciente no tiene una serie activa" };
     }
 
-    const { series } = patientSeries;
+    const { series, id: patientSeriesId } = patientSeries;
     const { therapy, postures: seriesPostures } = series;
 
     const postures = seriesPostures.map(sp => {
@@ -49,6 +49,7 @@ export const getRoutineByPatientId = async (patientId) => {
 
     return {
       success: true,
+      patientSeriesId, 
       seriesId: series.id,
       name: series.name,
       therapy: therapy.name,
