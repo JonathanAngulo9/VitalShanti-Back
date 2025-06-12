@@ -101,7 +101,7 @@ export const createSession = async ({ patientSeriesId, painBeforeId, startedAt }
         startedAt: new Date(startedAt),
         endedAt: new Date("2025-12-31T23:59:59.000Z"), // valor inicial quemado
         pauses: 0,
-        effectiveMinutes: 25,
+        effectiveMinutes: 0,
         comment: ""
       },
       include: {
@@ -117,7 +117,7 @@ export const createSession = async ({ patientSeriesId, painBeforeId, startedAt }
   }
 };
 
-export const updateSession = async (id, { painAfterId, comment, endedAt, pauses, effectiveMinutes }) => {
+export const updateSession = async (id, { painAfterId, comment, endedAt, pauses }) => {
   try {
     if (!painAfterId || !comment || !endedAt) {
       throw new Error("Faltan datos obligatorios");
@@ -133,22 +133,37 @@ export const updateSession = async (id, { painAfterId, comment, endedAt, pauses,
     }
 
     return await prisma.$transaction(async (tx) => {
-      //Actualizar la sesión
+      // Obtener la sesión actual para obtener startedAt
+      const currentSession = await tx.session.findUnique({
+        where: { id: Number(id) }
+      });
+
+      if (!currentSession) {
+        throw new Error("Sesión no encontrada");
+      }
+
+      // Calcular la diferencia en minutos
+      const startedAt = currentSession.startedAt;
+      const endDate = new Date(endedAt);
+      const diffInMilliseconds = endDate - startedAt;
+      const effectiveMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
+
+      // Actualizar la sesión
       const updatedSession = await tx.session.update({
         where: { id: Number(id) },
         data: {
           painAfterId: Number(painAfterId),
           comment,
-          endedAt: new Date(endedAt),
-          pauses: 0,
-          effectiveMinutes: 0
+          endedAt: endDate,
+          pauses: pauses || 0,
+          effectiveMinutes
         },
         include: {
           patientSeries: true
         }
       });
 
-      //Actualizar el contador en PatientSeries
+      // Actualizar el contador en PatientSeries
       await tx.patientSeries.update({
         where: { id: updatedSession.patientSeriesId },
         data: {
@@ -156,7 +171,7 @@ export const updateSession = async (id, { painAfterId, comment, endedAt, pauses,
         }
       });
 
-      //Obtener el nuevo valor
+      // Obtener el nuevo valor
       const updatedPatientSeries = await tx.patientSeries.findUnique({
         where: { id: updatedSession.patientSeriesId }
       });
