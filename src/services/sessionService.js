@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+const prismaDefault = new PrismaClient();
 
 /**
  * Obtiene el historial de niveles de dolor de un paciente
  */
-export const getPainOverTime = async (idPatient) => {
+export const getPainOverTime = async (idPatient, prisma=prismaDefault) => {
   // Buscar el paciente
   const paciente = await prisma.user.findUnique({
     where: { id: parseInt(idPatient) },
@@ -77,7 +77,7 @@ export const getPainOverTime = async (idPatient) => {
   };
 };
 //Crear una nueva sesion
-export const createSession = async ({ patientSeriesId, painBeforeId, startedAt }) => {
+export const createSession = async ({ patientSeriesId, painBeforeId, startedAt }, prisma=prismaDefault) => {
   try {
     // Verificar si existe el PatientSeries
     const patientSeriesExists = await prisma.patientSeries.findUnique({
@@ -117,7 +117,7 @@ export const createSession = async ({ patientSeriesId, painBeforeId, startedAt }
   }
 };
 
-export const updateSession = async (id, { painAfterId, comment, endedAt, pauses }) => {
+export const updateSession = async (id, { painAfterId, comment, endedAt, pauses }, prisma = prismaDefault) => {
   try {
     if (!painAfterId || !comment || !endedAt) {
       throw new Error("Faltan datos obligatorios");

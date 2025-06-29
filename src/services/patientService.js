@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+const prismaDefault = new PrismaClient(); // En test se usa el mock de Prisma
 
 /**
  * Crea un nuevo paciente y lo vincula a un instructor
  */
-export const createPatient = async (patientData, instructorId) => {
+export const createPatient = async (patientData, instructorId, prisma=prismaDefault) => {
   const { email } = patientData;
 
   // Verificar si el correo ya está registrado
@@ -22,7 +22,18 @@ export const createPatient = async (patientData, instructorId) => {
     }
   });
 
+  // ** verificar existenciaa instructor :D agregué un test sobre esto, no tan necesario.
+  // borrar o descomentar en este y test, si se va o deja**
+
+  //const instructorExists = await prisma.user.findUnique({
+  //  where: { id: instructorId, role: 'Instructor' }
+  //});
+  //if (!instructorExists) {
+  //  return { success: false, message: "El instructor no existe" };
+  //}
+
   // Asociar al instructor
+
   await prisma.instructorPatient.create({
     data: {
       instructorId,
@@ -36,7 +47,7 @@ export const createPatient = async (patientData, instructorId) => {
 /**
  * Obtener pacientes asignados a un instructor
  */
-export const getPatientsByInstructorId = async (instructorId) => {
+export const getPatientsByInstructorId = async (instructorId, prisma = prismaDefault) => {
   const patients = await prisma.instructorPatient.findMany({
     where: { instructorId: parseInt(instructorId) },
     include: {
@@ -50,7 +61,7 @@ export const getPatientsByInstructorId = async (instructorId) => {
 /**
  * Actualizar información del paciente
  */
-export const updatePatient = async (id, updateData) => {
+export const updatePatient = async (id, updateData, prisma = prismaDefault) => {
   // Verificar existencia y rol
   const existing = await prisma.user.findFirst({
     where: {
@@ -71,7 +82,7 @@ export const updatePatient = async (id, updateData) => {
   return { success: true, patient: updated };
 };
 
-export const fetchSesionesByPaciente = async (idPaciente) => {
+export const fetchSesionesByPaciente = async (idPaciente, prisma = prismaDefault) => {
   const sesiones = await prisma.session.findMany({
     where: {
       patientSeries: {

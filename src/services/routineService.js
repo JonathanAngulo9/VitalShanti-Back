@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+const prismaDefault = new PrismaClient();
 
-export const getRoutineByPatientId = async (patientId) => {
+export const getRoutineByPatientId = async (patientId, prisma=prismaDefault) => {
   try {
     const patientSeries = await prisma.patientSeries.findFirst({
       where: {
@@ -60,6 +60,6 @@ export const getRoutineByPatientId = async (patientId) => {
     
   } catch (error) {
     console.error('Error al obtener la rutina del paciente:', error);
-    return { success: false, message: 'Error del servidor' };
+    return { success: false, message: 'Error del servidor' }; // wows
   }
 };

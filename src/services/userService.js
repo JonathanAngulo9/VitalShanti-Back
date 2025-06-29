@@ -1,13 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
+const prismaDefault = new PrismaClient();
 const saltRounds = 10;
 
 /**
  * Inicia sesión de usuario verificando email y contraseña cifrada
  */
-export const loginUser = async (email, password) => {
+export const loginUser = async (email, password, prisma=prismaDefault) => {
   const user = await prisma.user.findUnique({
     where: { email }
   });
@@ -27,7 +27,7 @@ export const loginUser = async (email, password) => {
 /**
  * Registra un nuevo usuario cifrando la contraseña
  */
-export const registerUser = async (userData) => {
+export const registerUser = async (userData, prisma = prismaDefault) => {
   const { email, identification } = userData;
 
   // Verifica si ya existe un usuario con el mismo email o identificación

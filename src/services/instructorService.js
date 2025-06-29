@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+const prismaDefault = new PrismaClient(); // En test se usa el mock de Prisma
 
 /**
  * Crea una rutina (serie) para un paciente, validando que sea del instructor correspondiente
  */
-export const crearRutina = async ({ pacienteId, nombre, tipoTerapiaId, sesionesRecom, posturas }, instructorId) => {
+export const crearRutina = async ({ pacienteId, nombre, tipoTerapiaId, sesionesRecom, posturas }, instructorId, prisma=prismaDefault) => {
   if (!pacienteId || !nombre || !tipoTerapiaId || !posturas ) {
     throw new Error('Faltan datos');
   }
@@ -81,10 +81,10 @@ export const crearRutina = async ({ pacienteId, nombre, tipoTerapiaId, sesionesR
 /**
  * Devuelve todas las posturas
  */
-export const obtenerPosturas = async () => {
+export const obtenerPosturas = async (prisma=prismaDefault) => {
   return await prisma.posture.findMany();
 };
 
-export const obtenerTerapias = async () => {
+export const obtenerTerapias = async (prisma= prismaDefault) => {
   return await prisma.therapy.findMany();
 };
