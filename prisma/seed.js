@@ -30,7 +30,10 @@ async function main() {
             phone: "0987654321",
             role: "Paciente",
             email: "andres@vitalshanti.com",
-            password: passwordHash
+            password: passwordHash,
+            age: 28,
+            gender: "Masculino",
+            medicalConditions: "Hipertensión y problemas de espalda"
         }
     });
 

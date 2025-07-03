@@ -50,16 +50,25 @@ export const registerUser = async (userData) => {
   try {
     const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
 
+    const newUserData = {
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      identification: userData.identification,
+      phone: userData.phone,
+      role: userData.role,
+      email: userData.email,
+      password: hashedPassword
+    };
+
+    // Solo si son pacientes, añadir estos campos:
+    if (userData.role === "Paciente") {
+      newUserData.age = userData.age;
+      newUserData.gender = userData.gender;
+      newUserData.medicalConditions = userData.medicalConditions;
+    }
+
     const newUser = await prisma.user.create({
-      data: {
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        identification,
-        phone: userData.phone,
-        role: userData.role,
-        email,
-        password: hashedPassword
-      }
+      data: newUserData
     });
 
     return { success: true, user: newUser };
