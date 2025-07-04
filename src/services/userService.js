@@ -62,9 +62,9 @@ export const registerUser = async (userData) => {
 
     // Solo si son pacientes, añadir estos campos:
     if (userData.role === "Paciente") {
-      newUserData.age = userData.age;
+      newUserData.age = userData.age ? parseInt(userData.age, 10) : null;;
       newUserData.gender = userData.gender;
-      newUserData.medicalConditions = userData.medicalConditions;
+      newUserData.medicalConditions = userData.medicalConditions || null;
     }
 
     const newUser = await prisma.user.create({

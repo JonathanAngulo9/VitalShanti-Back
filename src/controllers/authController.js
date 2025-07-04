@@ -1,4 +1,5 @@
 import { loginUser, registerUser } from '../services/userService.js';
+import { createPatient } from '../services/patientService.js';
 
 //Token
 import jwt from 'jsonwebtoken';
@@ -94,7 +95,8 @@ export const registerPaciente = async (req, res) => {
     gender,
     medicalConditions,
     email,
-    password
+    password,
+    instructorId
   } = req.body;
 
   // ✅ Validación de campos obligatorios
@@ -124,18 +126,19 @@ export const registerPaciente = async (req, res) => {
 
   try {
     const sanitizedConditions = medicalConditions?.trim().slice(0, 1000) || "";
-    const result = await registerUser({
+    const result = await createPatient({
       firstName,
       lastName,
       identification,
       phone,
-      age,
+      age: Number(age),
       gender,
       medicalConditions: sanitizedConditions,
       email,
       password,
-      role: "Paciente"
-    });
+    },
+      instructorId
+    );
 
     if (!result.success) {
       return res.json(result);
