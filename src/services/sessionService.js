@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+const prismaDefault = new PrismaClient();
 
 /**
  * Obtiene el historial de niveles de dolor de un paciente
  */
-export const getPainOverTime = async (idPatient) => {
+export const getPainOverTime = async (idPatient, prisma = prismaDefault) => {
   // Buscar el paciente
   const paciente = await prisma.user.findUnique({
     where: { id: parseInt(idPatient) },
@@ -76,114 +76,62 @@ export const getPainOverTime = async (idPatient) => {
     data: painData
   };
 };
-//Crear una nueva sesion
-export const createSession = async ({ patientSeriesId, painBeforeId, startedAt }) => {
+
+export const createSession = async (
+  { patientSeriesId, painBeforeId, startedAt, painAfterId, endedAt, comment, pauses, effectiveMinutes },
+  prisma = prismaDefault
+) => {
   try {
-    // Verificar si existe el PatientSeries
-    const patientSeriesExists = await prisma.patientSeries.findUnique({
-      where: { id: Number(patientSeriesId) }
-    });
+    const effectiveMinutesInSeconds = effectiveMinutes || 0;
+    const effectiveMinutesInMinutes = Math.round(effectiveMinutesInSeconds / 60);
 
-    // Imprimir si se encuentra o no el PatientSeries
-    console.log('Paciente con la serie encontrado:', patientSeriesExists);
-
-    // Si no se encuentra, lanzar un error
-    if (!patientSeriesExists) {
-      throw new Error(`No se encontró la serie de paciente con el ID ${patientSeriesId}`);
-    }
-
-    // Crear la nueva sesión
-    const newSession = await prisma.session.create({
-      data: {
-        painBefore: { connect: { id: Number(painBeforeId) } },
-        painAfter: { connect: { id: 1 } }, // valor inicial quemado
-        patientSeries: { connect: { id: Number(patientSeriesId) } },
-        startedAt: new Date(startedAt),
-        endedAt: new Date("2025-12-31T23:59:59.000Z"), // valor inicial quemado
-        pauses: 0,
-        effectiveMinutes: 0,
-        comment: ""
-      },
-      include: {
-        patientSeries: true
-      }
-    });
-
-    return newSession;
-
-  } catch (error) {
-    console.error('Error al crear la sesión:', error);
-    throw new Error("No se pudo crear la sesión: " + error.message);
-  }
-};
-
-export const updateSession = async (id, { painAfterId, comment, endedAt, pauses }) => {
-  try {
-    if (!painAfterId || !comment || !endedAt) {
-      throw new Error("Faltan datos obligatorios");
-    }
-
-    // Verificar que exista el nivel de dolor
-    const painLevel = await prisma.painLevel.findUnique({
-      where: { id: Number(painAfterId) }
-    });
-
-    if (!painLevel) {
-      throw new Error("Nivel de dolor no encontrado");
-    }
-
-    return await prisma.$transaction(async (tx) => {
-      // Obtener la sesión actual para obtener startedAt
-      const currentSession = await tx.session.findUnique({
-        where: { id: Number(id) }
+    const result = await prisma.$transaction(async (tx) => {
+      const patientSeriesExists = await tx.patientSeries.findUnique({
+        where: { id: Number(patientSeriesId) }
       });
 
-      if (!currentSession) {
-        throw new Error("Sesión no encontrada");
+      if (!patientSeriesExists) {
+        throw new Error(`No se encontró la serie de paciente con el ID ${patientSeriesId}`);
       }
 
-      // Calcular la diferencia en minutos
-      const startedAt = currentSession.startedAt;
-      const endDate = new Date(endedAt);
-      const diffInMilliseconds = endDate - startedAt;
-      const effectiveMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
-
-      // Actualizar la sesión
-      const updatedSession = await tx.session.update({
-        where: { id: Number(id) },
+      // Crear la nueva sesión
+      const newSession = await tx.session.create({
         data: {
-          painAfterId: Number(painAfterId),
-          comment,
-          endedAt: endDate,
+          painBefore: { connect: { id: Number(painBeforeId) } },
+          painAfter: { connect: { id: Number(painAfterId) } },
+          patientSeries: { connect: { id: Number(patientSeriesId) } },
+          startedAt: new Date(startedAt),
+          endedAt: new Date(endedAt),
           pauses: pauses || 0,
-          effectiveMinutes
+          effectiveMinutes: effectiveMinutesInMinutes,
+          comment
         },
         include: {
           patientSeries: true
         }
       });
 
-      // Actualizar el contador en PatientSeries
       await tx.patientSeries.update({
-        where: { id: updatedSession.patientSeriesId },
+        where: { id: Number(patientSeriesId) },
         data: {
           sessionsCompleted: { increment: 1 }
         }
       });
 
-      // Obtener el nuevo valor
       const updatedPatientSeries = await tx.patientSeries.findUnique({
-        where: { id: updatedSession.patientSeriesId }
+        where: { id: Number(patientSeriesId) }
       });
 
       return {
-        updatedSession,
+        newSession,
         sessionsCompleted: updatedPatientSeries.sessionsCompleted
       };
     });
 
+    return result;
+
   } catch (error) {
-    console.error('Error al actualizar la sesión:', error);
-    throw new Error("No se pudo actualizar la sesión: " + error.message);
+    console.error('Error al crear la sesión:', error);
+    throw new Error("No se pudo crear la sesión: " + error.message);
   }
 };

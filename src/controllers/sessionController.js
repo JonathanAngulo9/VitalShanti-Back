@@ -2,19 +2,24 @@ import * as sessionService from "../services/sessionService.js";
 
 export const createSessionController = async (req, res) => {
   try {
-    const { patientSeriesId, painBeforeId, startedAt } = req.body;
-    
-    if (!patientSeriesId || !painBeforeId || !startedAt) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Faltan campos obligatorios" 
+    const { patientSeriesId, painBeforeId, startedAt, painAfterId, endedAt, comment, pauses, effectiveMinutes } = req.body;
+
+    if (!patientSeriesId || !painBeforeId || !startedAt || !painAfterId || !endedAt || !comment || !effectiveMinutes) {
+      return res.status(400).json({
+        success: false,
+        message: "Faltan campos obligatorios"
       });
     }
 
     const newSession = await sessionService.createSession({ 
       patientSeriesId, 
       painBeforeId, 
-      startedAt 
+      startedAt,
+      painAfterId,
+      endedAt,
+      comment,
+      pauses,
+      effectiveMinutes
     });
     
     res.json({ 
@@ -31,7 +36,7 @@ export const createSessionController = async (req, res) => {
   }
 };
 
-export const updateSessionController = async (req, res) => {
+/*export const updateSessionController = async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { painAfterId, comment, endedAt, pauses, effectiveMinutes } = req.body;
@@ -61,4 +66,4 @@ export const updateSessionController = async (req, res) => {
       message: error.message 
     });
   }
-};
+};*/
