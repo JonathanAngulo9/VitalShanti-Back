@@ -81,7 +81,24 @@ export const registerInstructor = async (req, res) => {
     return res.json({ success: true, message: 'Instructor registrado exitosamente' });
   } catch (error) {
     console.error("Error registrando instructor:", error);
-    return res.status(500).json({ success: false, message: "Error en el servidor" });
+    if (error.code === 'P1001') {
+      return res.status(500).json({
+        success: false,
+        message: "No se pudo conectar con la base de datos"
+      });
+    }
+
+    if (error.code === 'P2002') {
+      return res.status(400).json({
+        success: false,
+        message: "Cédula o correo ya registrados"
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Error interno del servidor"
+    });
   }
 };
 
@@ -151,9 +168,24 @@ export const registerPaciente = async (req, res) => {
 
   } catch (error) {
     console.error("Error registrando paciente:", error);
+
+    if (error.code === 'P1001') {
+      return res.status(500).json({
+        success: false,
+        message: "No se pudo conectar con la base de datos"
+      });
+    }
+
+    if (error.code === 'P2002') {
+      return res.status(400).json({
+        success: false,
+        message: "Cédula o correo ya registrados"
+      });
+    }
+
     return res.status(500).json({
       success: false,
-      message: "Error en el servidor"
+      message: "Error interno del servidor"
     });
   }
 };
