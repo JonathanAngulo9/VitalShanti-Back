@@ -91,7 +91,7 @@ export const registerInstructor = async (req, res) => {
     if (error.code === 'P2002') {
       return res.status(400).json({
         success: false,
-        message: "Cédula o correo ya registrados"
+        message: "Cédula ya registrada"
       });
     }
 
@@ -179,7 +179,7 @@ export const registerPaciente = async (req, res) => {
     if (error.code === 'P2002') {
       return res.status(400).json({
         success: false,
-        message: "Cédula o correo ya registrados"
+        message: "Cédula ya registrada"
       });
     }
 
