@@ -124,20 +124,22 @@ export const registerPaciente = async (req, res) => {
     });
   }
 
-  // ✅ Validar edad
-  if (isNaN(age) || age < 0 || age > 120) {
-    return res.status(400).json({
-      success: false,
-      message: "La edad debe ser un número válido entre 0 y 120"
-    });
-  }
-
   // ✅ Validar género
   const validGenders = ["Masculino", "Femenino", "Otro", "Prefiero no decir"];
   if (!validGenders.includes(gender)) {
     return res.status(400).json({
       success: false,
       message: "Género no válido"
+    });
+  }
+
+  // ✅ Validar edad
+  const parsedAge = Number(age);
+
+  if (isNaN(parsedAge) || parsedAge < 0 || parsedAge > 120) {
+    return res.status(400).json({
+      success: false,
+      message: "La edad debe ser un número válido entre 0 y 120"
     });
   }
 
@@ -148,7 +150,7 @@ export const registerPaciente = async (req, res) => {
       lastName,
       identification,
       phone,
-      age: Number(age),
+      age: parsedAge,
       gender,
       medicalConditions: sanitizedConditions,
       email,
@@ -182,6 +184,13 @@ export const registerPaciente = async (req, res) => {
         message: "Cédula ya registrada"
       });
     }
+
+    console.error("Error registrando paciente:", {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+      error,
+    });
 
     return res.status(500).json({
       success: false,
