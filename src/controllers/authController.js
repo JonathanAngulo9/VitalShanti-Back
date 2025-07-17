@@ -183,6 +183,13 @@ export const registerPaciente = async (req, res) => {
       });
     }
 
+    console.error("Error registrando paciente:", {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+      error,
+    });
+
     return res.status(500).json({
       success: false,
       message: "Error interno del servidor"
