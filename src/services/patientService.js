@@ -30,10 +30,17 @@ export const createPatient = async (patientData, instructorId) => {
   // Crear nuevo paciente
   const newPatient = await prisma.user.create({
     data: {
-      ...patientData,
-      password: hashedPassword,
-      role: 'Paciente',
-    }
+    firstName: patientData.firstName,
+    lastName: patientData.lastName,
+    identification: patientData.identification,
+    phone: patientData.phone,
+    age: patientData.age,
+    gender: patientData.gender,
+    medicalConditions: patientData.medicalConditions,
+    email: patientData.email,
+    role: 'Paciente',
+    password: hashedPassword,
+  }
   });
 
   // Asociar al instructor
